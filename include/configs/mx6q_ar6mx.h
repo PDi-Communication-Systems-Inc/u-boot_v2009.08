@@ -67,7 +67,7 @@
  * Hardware drivers
  */
 #define CONFIG_MXC_UART
-#define CONFIG_UART_BASE_ADDR   UART1_BASE_ADDR
+#define CONFIG_UART_BASE_ADDR   UART4_BASE_ADDR
 
 /* allow to overwrite serial and ethaddr */
 #define CONFIG_ENV_OVERWRITE
@@ -130,8 +130,8 @@
 		"kernel=uImage\0"				\
 		"bootdelay=2\0"				\
 		"loadaddr=0x10800000\0"       \
-		"bootargs=console=ttymxc0,115200\0"	\
-		"bootargs_base=setenv bootargs console=ttymxc0,115200\0"	\
+		"bootargs=console=ttymxc3,115200\0"	\
+		"bootargs_base=setenv bootargs console=ttymxc3,115200\0"	\
 		"bootargs_hdmi=setenv bootargs ${bootargs} root=/dev/mmcblk0p1 "	\
 		"rootwait rw video=mxcfb0:dev=hdmi,1920x1080M@60,if=RGB24 enable_wait_mode=off\0"		\
 		"bootargs_ldb=setenv bootargs ${bootargs} root=/dev/mmcblk0p1 "	\

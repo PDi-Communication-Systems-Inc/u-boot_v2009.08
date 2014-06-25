@@ -68,7 +68,7 @@
  * Hardware drivers
  */
 #define CONFIG_MXC_UART
-#define CONFIG_UART_BASE_ADDR   UART1_BASE_ADDR
+#define CONFIG_UART_BASE_ADDR   UART4_BASE_ADDR
 
 /* allow to overwrite serial and ethaddr */
 #define CONFIG_ENV_OVERWRITE
@@ -117,7 +117,7 @@
 #define CONFIG_LOADADDR		0x10800000	/* loadaddr env var */
 #define CONFIG_RD_LOADADDR	(CONFIG_LOADADDR + 0x300000)
 
-#define CONFIG_BOOTARGS         "console=ttymxc0,115200 rdinit=/linuxrc "\
+#define CONFIG_BOOTARGS         "console=ttymxc3,115200 rdinit=/linuxrc "\
 				"enable_wait_mode=off nosmp emmc_en "\
 				"arm_freq=800 spi-nor"
 #define CONFIG_BOOTCOMMAND      "bootm 0x10800000 0x10c00000"

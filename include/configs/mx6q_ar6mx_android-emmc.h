@@ -75,7 +75,7 @@
 		"netdev=eth0\0"						\
 		"ethprime=FEC0\0"					\
 		"fastboot_dev=mmc1\0"					\
-		"bootcmd=run bootargs_hdmi;booti mmc1\0"					\
+		"bootcmd=booti mmc1\0"					\
 		"bootargs=console=ttymxc3,115200 init=/init emmc_en video=mxcfb0:dev=hdmi,1280x720M@60,if=RGB24,bpp=32  video=mxcfb1:off video=mxcfb2:off vmalloc=400M  androidboot.console=ttymxc3 androidboot.hardware=freescale\0"	\
 		"bootargs_base=setenv bootargs console=ttymxc3,115200\0"\
 		"bootargs_ldb=setenv bootargs ${bootargs} init=/init emmc_en "	\
@@ -83,12 +83,12 @@
 			"video=mxcfb1:off video=mxcfb2:off vmalloc=400M "	\
 			"androidboot.console=ttymxc3 androidboot.hardware=freescale\0"	\
 		"bootargs_hdmi=setenv bootargs ${bootargs} init=/init emmc_en "	\
-			"video=mxcfb0:dev=hdmi,1920x1080M@60,if=RGB24,bpp=32 " \
+			"video=mxcfb0:dev=hdmi,1280x720M@60,if=RGB24,bpp=32 " \
 			"video=mxcfb1:off video=mxcfb2:off vmalloc=400M "	\
 			"androidboot.console=ttymxc3 androidboot.hardware=freescale\0"	\
 		"bootargs_dual=setenv bootargs ${bootargs} init=/init emmc_en "	\
 			"video=mxcfb0:dev=ldb,1024x600M@60,bpp=32 " \
-			"video=mxcfb1:dev=hdmi,1920x1080M@60,bpp=32 " \
+			"video=mxcfb1:dev=hdmi,1280x720M@60,bpp=32 " \
 			"video=mxcfb2:off vmalloc=400M "	\
 			"androidboot.console=ttymxc3 androidboot.hardware=freescale\0"
 #endif

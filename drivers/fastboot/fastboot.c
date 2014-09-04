@@ -86,6 +86,9 @@ struct fastboot_device_info fastboot_devinfo;
 /* defined and used by gadget/ep0.c */
 extern struct usb_string_descriptor **usb_strings;
 
+/* check fastboot selection via GPIO Arrow Left and Arrow Up*/
+extern int check_fastboot_by_arrow_left_and_down(void);
+
 static struct usb_device_instance device_instance[1];
 static struct usb_bus_instance bus_instance[1];
 static struct usb_configuration_instance config_instance[1];
@@ -786,6 +789,8 @@ static int fastboot_cdc_setup(struct usb_device_request *request, struct urb *ur
 void check_fastboot_mode(void)
 {
 	if (fastboot_check_and_clean_flag())
+		do_fastboot(NULL, 0, 0, 0);
+	if (check_fastboot_by_arrow_left_and_down())
 		do_fastboot(NULL, 0, 0, 0);
 }
 

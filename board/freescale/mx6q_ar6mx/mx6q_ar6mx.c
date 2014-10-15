@@ -1153,7 +1153,22 @@ int check_recovery_cmd_file(void)
           int button_pressed = 0;
           int recovery_mode = 0;
 
+          u32 reg;
+
           recovery_mode = check_and_clean_recovery_flag();
+
+          mxc_iomux_v3_setup_pad(MX6X_IOMUX(PAD_NANDF_D1__GPIO_2_1));  // Navigation Arrow Up
+          mxc_iomux_v3_setup_pad(MX6X_IOMUX(PAD_NANDF_D2__GPIO_2_2));  // Navigation Arrow Down
+          mxc_iomux_v3_setup_pad(MX6X_IOMUX(PAD_NANDF_D3__GPIO_2_3));  // Navigation Arrow Left
+          reg = readl(GPIO2_BASE_ADDR + GPIO_GDIR);
+          reg &= ~(1<<1 | 1<<2 | 1<<3);
+          writel(reg, GPIO2_BASE_ADDR + GPIO_GDIR);
+          reg = readl(GPIO2_BASE_ADDR + GPIO_PSR);
+
+          if(!(reg & (1<<1 | 1<<2 | 1<<3))) {
+		button_pressed = 1;
+		printf("Recovery key pressed\n");
+          }
 
 
           return recovery_mode || button_pressed;
@@ -1161,6 +1176,37 @@ int check_recovery_cmd_file(void)
 
 #endif
 //PDi mrobbeloth
+
+
+#ifdef CONFIG_FASTBOOT
+
+int check_fastboot_by_arrow_left_and_down(void)
+{
+          int button_pressed = 0;
+
+          u32 reg;
+
+          mxc_iomux_v3_setup_pad(MX6X_IOMUX(PAD_NANDF_D1__GPIO_2_1));  // Navigation Arrow Up
+          mxc_iomux_v3_setup_pad(MX6X_IOMUX(PAD_NANDF_D2__GPIO_2_2));  // Navigation Arrow Down
+          mxc_iomux_v3_setup_pad(MX6X_IOMUX(PAD_NANDF_D3__GPIO_2_3));  // Navigation Arrow Left
+          reg = readl(GPIO2_BASE_ADDR + GPIO_GDIR);
+          reg &= ~(1<<1 | 1<<2 | 1<<3);
+          writel(reg, GPIO2_BASE_ADDR + GPIO_GDIR);
+
+          // Select fastboot if Arrows Left and Up are selected and Arrow Down is not selected
+          reg = (readl(GPIO2_BASE_ADDR + GPIO_PSR) ^ (1<<2));
+
+          if(!(reg & (1<<1 | 1<<2 | 1<<3))) {
+		button_pressed = 1;
+		printf("fastboot key pressed\n");
+          }
+
+
+          return button_pressed;
+}
+
+#endif
+
 
 int board_late_init(void)
 {

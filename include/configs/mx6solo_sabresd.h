@@ -68,7 +68,7 @@
  * Hardware drivers
  */
 #define CONFIG_MXC_UART
-#define CONFIG_UART_BASE_ADDR   UART1_BASE_ADDR
+#define CONFIG_UART_BASE_ADDR   UART4_BASE_ADDR
 
 /* allow to overwrite serial and ethaddr */
 #define CONFIG_ENV_OVERWRITE
@@ -122,7 +122,7 @@
 	"uboot=u-boot.bin\0"						\
 	"kernel=uImage\0"						\
 	"nfsroot=/opt/eldk/arm\0"					\
-	"bootargs_base=setenv bootargs console=ttymxc0,115200 nosmp\0"	\
+	"bootargs_base=setenv bootargs console=ttymxc3,115200 nosmp\0"	\
 	"bootargs_nfs=setenv bootargs ${bootargs} root=/dev/nfs "	\
 		"ip=dhcp nfsroot=${serverip}:${nfsroot},v3,tcp\0"	\
 	"bootcmd_net=run bootargs_base bootargs_nfs; "			\

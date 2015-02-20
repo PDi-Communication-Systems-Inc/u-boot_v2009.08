@@ -76,9 +76,9 @@
 		"ethprime=FEC0\0"					\
 		"fastboot_dev=mmc3\0"					\
 		"bootcmd=booti mmc3\0"					\
-		"bootargs=console=ttymxc0,115200 init=/init nosmp "	\
+		"bootargs=console=ttymxc3,115200 init=/init nosmp "	\
 		"video=mxcfb0:dev=ldb,bpp=32 video=mxcfb1:off video=mxcfb2:off gpumem=96M "	\
-		"fbmem=10M fb0base=0x17b00000 vmalloc=400M androidboot.console=ttymxc0 "	\
+		"fbmem=10M fb0base=0x17b00000 vmalloc=400M androidboot.console=ttymxc3 "	\
 		"androidboot.hardware=freescale\0"			\
 		"splashimage=0x1D000000\0"				\
 		"splashpos=m,m\0"					\

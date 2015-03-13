@@ -75,7 +75,7 @@
 		"netdev=eth0\0"						\
 		"ethprime=FEC0\0"					\
 		"fastboot_dev=mmc1\0"					\
-		"bootcmd=run bootargs_hdmi; booti mmc1\0"					\
+		"bootcmd=run bootargs_dual;booti mmc1\0"					\
 		"bootargs=console=ttymxc0,115200\0"		\
 		"bootargs_base=console=ttymxc0,115200\0"		\
 		"bootargs_ldb=setenv bootargs ${bootargs_base} init=/init emmc_en "	\

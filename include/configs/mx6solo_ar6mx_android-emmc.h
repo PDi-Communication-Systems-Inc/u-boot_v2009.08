@@ -56,7 +56,7 @@
 #define CONFIG_ANDROID_CACHE_PARTITION_MMC 6
 
 
-#define CONFIG_ANDROID_RECOVERY_BOOTARGS_MMC NULL
+#define CONFIG_ANDROID_RECOVERY_BOOTARGS_MMC "setenv bootargs ${bootargs_dual}"
 #define CONFIG_ANDROID_RECOVERY_BOOTCMD_MMC  \
 	"booti mmc1 recovery"
 #define CONFIG_ANDROID_RECOVERY_CMD_FILE "/recovery/command"

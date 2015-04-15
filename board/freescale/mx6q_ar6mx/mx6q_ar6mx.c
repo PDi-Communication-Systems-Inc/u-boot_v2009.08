@@ -97,6 +97,12 @@ iomux_v3_cfg_t board_ver_pads[] = {
 #endif
 };
 
+// PDi mrobbeloth Board version GPIO
+#define AR6MX_VER_B0                IMX_GPIO_NR(4, 25)
+#define AR6MX_VER_B1                IMX_GPIO_NR(4, 26)
+#define AR6MX_VER_B2                IMX_GPIO_NR(4, 27)
+#define AR6MX_VER_B3                IMX_GPIO_NR(4, 28)
+
 DECLARE_GLOBAL_DATA_PTR;
 
 static enum boot_device boot_dev;
@@ -131,6 +137,27 @@ static struct fb_videomode lvds_xga = {
 
 vidinfo_t panel_info;
 #endif
+
+int ar6mxs_board_version(void) {
+        int b3 = 0;
+        int b2 = 0;
+        int b1 = 0;
+        int b0 = 0;
+        int ret = 0;
+
+        printf("Detecting board version\n");
+        b3 = gpio_get_value(AR6MX_VER_B3);
+        b2 = gpio_get_value(AR6MX_VER_B2);
+        b1 = gpio_get_value(AR6MX_VER_B1);
+        b0 = gpio_get_value(AR6MX_VER_B0);
+        ret |= (b3 << 3);
+	ret |= (b2 << 2);
+	ret |= (b1 << 1);
+	ret |= (b0 << 0);
+        printf("BCM Board Version=%x%x%x%x (raw) \n", b3, b2, b1, b0);
+	printf("BCM BOard Version=%x (unified) \n", ret);
+	return ret; 
+}
 
 static inline void setup_boot_device(void)
 {
@@ -359,26 +386,78 @@ int dram_init(void)
 
 static void setup_uart(void)
 {
+int board_version = ar6mxs_board_version();
 #if defined CONFIG_MX6Q
-	/* UART4 TXD */
-	mxc_iomux_v3_setup_pad(MX6Q_PAD_KEY_COL0__UART4_TXD);
-	/* UART1 TXD */
-	mxc_iomux_v3_setup_pad(MX6Q_PAD_SD3_DAT7__UART1_TXD);
+	/* 1.0, 2.0, or later board */
+	if (board_version == 0x1) {
+		/* UART4 TXD */
+		mxc_iomux_v3_setup_pad(MX6Q_PAD_KEY_COL0__UART4_TXD);
+		/* UART1 TXD */
+		mxc_iomux_v3_setup_pad(MX6Q_PAD_SD3_DAT7__UART1_TXD);
 
-	/* UART4 RXD */
-	mxc_iomux_v3_setup_pad(MX6Q_PAD_KEY_ROW0__UART4_RXD);
-	/* UART1 RXD */
-	mxc_iomux_v3_setup_pad(MX6Q_PAD_SD3_DAT6__UART1_RXD);
+		/* UART4 RXD */
+		mxc_iomux_v3_setup_pad(MX6Q_PAD_KEY_ROW0__UART4_RXD);
+		/* UART1 RXD */
+		mxc_iomux_v3_setup_pad(MX6Q_PAD_SD3_DAT6__UART1_RXD);
+	}
+	/* 0.3 board */
+	else if (board_version == 0xf) {
+	        /* UART4 TXD */
+                mxc_iomux_v3_setup_pad(MX6Q_PAD_KEY_COL0__UART4_TXD);
+                /* UART1 TXD */
+                mxc_iomux_v3_setup_pad(MX6Q_PAD_SD3_DAT7__UART1_RXD);
+
+                /* UART4 RXD */
+                mxc_iomux_v3_setup_pad(MX6Q_PAD_KEY_ROW0__UART4_RXD);
+                /* UART1 RXD */
+                mxc_iomux_v3_setup_pad(MX6Q_PAD_SD3_DAT6__UART1_TXD);	
+	}
+	/* unknown board rev */
+	else {
+                /* UART4 TXD */
+                mxc_iomux_v3_setup_pad(MX6Q_PAD_KEY_COL0__UART4_TXD);
+                /* UART1 TXD */
+                mxc_iomux_v3_setup_pad(MX6Q_PAD_SD3_DAT7__UART1_TXD);
+
+                /* UART4 RXD */
+                mxc_iomux_v3_setup_pad(MX6Q_PAD_KEY_ROW0__UART4_RXD);
+                /* UART1 RXD */
+                mxc_iomux_v3_setup_pad(MX6Q_PAD_SD3_DAT6__UART1_RXD);
+	}
 #elif defined CONFIG_MX6DL
-	/* UART4 TXD */
-	mxc_iomux_v3_setup_pad(MX6DL_PAD_KEY_COL0__UART4_TXD);
-	/* UART1 TXD */
-	mxc_iomux_v3_setup_pad(MX6DL_PAD_SD3_DAT7__UART1_TXD);
+	if (board_version == 0x1) {
+		/* UART4 TXD */
+        	mxc_iomux_v3_setup_pad(MX6DL_PAD_KEY_COL0__UART4_TXD);
+        	/* UART1 TXD */
+        	mxc_iomux_v3_setup_pad(MX6DL_PAD_SD3_DAT7__UART1_TXD);
 
-	/* UART4 RXD */
-	mxc_iomux_v3_setup_pad(MX6DL_PAD_KEY_ROW0__UART4_RXD);
-	/* UART1 RXD */
-	mxc_iomux_v3_setup_pad(MX6DL_PAD_SD3_DAT6__UART1_RXD);
+        	/* UART4 RXD */
+        	mxc_iomux_v3_setup_pad(MX6DL_PAD_KEY_ROW0__UART4_RXD);
+        	/* UART1 RXD */
+        	mxc_iomux_v3_setup_pad(MX6DL_PAD_SD3_DAT6__UART1_RXD);
+        }
+	else if (board_version == 0xf) {
+	        /* UART4 TXD */
+                mxc_iomux_v3_setup_pad(MX6DL_PAD_KEY_COL0__UART4_TXD);
+                /* UART1 TXD */
+                mxc_iomux_v3_setup_pad(MX6DL_PAD_SD3_DAT7__UART1_RXD);
+
+                /* UART4 RXD */
+                mxc_iomux_v3_setup_pad(MX6DL_PAD_KEY_ROW0__UART4_RXD);
+                /* UART1 RXD */
+                mxc_iomux_v3_setup_pad(MX6DL_PAD_SD3_DAT6__UART1_TXD);
+        }
+	else {
+	        /* UART4 TXD */
+                mxc_iomux_v3_setup_pad(MX6DL_PAD_KEY_COL0__UART4_TXD);
+                /* UART1 TXD */
+                mxc_iomux_v3_setup_pad(MX6DL_PAD_SD3_DAT7__UART1_TXD);
+
+                /* UART4 RXD */
+                mxc_iomux_v3_setup_pad(MX6DL_PAD_KEY_ROW0__UART4_RXD);
+                /* UART1 RXD */
+                mxc_iomux_v3_setup_pad(MX6DL_PAD_SD3_DAT6__UART1_RXD);
+	}
 #endif
 }
 

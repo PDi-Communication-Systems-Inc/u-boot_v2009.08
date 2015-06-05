@@ -1233,9 +1233,11 @@ int check_fastboot_by_arrow_left_and_down(void)
 
 #endif
 
-
 int board_late_init(void)
 {
+	#ifdef CONFIG_SECURE_BOOT
+	   get_hab_status();
+	#endif	
 	return 0;
 }
 

@@ -66,6 +66,17 @@ SECTIONS
 	.u_boot_cmd : { *(.u_boot_cmd) }
 	__u_boot_cmd_end = .;
 
+	/* Extend to align to 0x1000, then put the Hab Data */
+	. = ALIGN(0x1000);
+	__hab_data = .;
+	. = . + 0x2000;
+	__data_enc_key = .;
+	/* actually, only 64bytes are needed, but this generates
+		a size multiple of 512bytes, which is optimal for SD boot */
+	. = . + 0x200;
+	__hab_data_end = .;
+	/* End of Hab Data, Place it before BSS section */
+	
 	. = ALIGN(4);
 	_end_of_copy = .; /* end_of ROM copy code here */
 	__bss_start = .;

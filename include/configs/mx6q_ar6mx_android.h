@@ -47,6 +47,7 @@
 /* This version incorporates HAB, should be coordinated with 
    WIDEVINE_SUPPORT directive in myandroid/make.sh */
 #define CONFIG_SECURE_BOOT
+#define DEBUG_AUTHENTICATE_IMAGE
 
 #define CONFIG_CMD_BOOTI
 #define CONFIG_ANDROID_RECOVERY
@@ -81,8 +82,8 @@
 		"bootcmd=booti mmc1\0"					\
                 "bootargs=console=ttymxc0,115200 init=/init emmc_en " \ 
                         "video=mxcfb0:dev=ldb,1366x768M@60,bpp=32 " \ 
-                        "video=mxcfb1:dev=hdmi,1280x720M@60,bpp=32 " \ 
-                        "video=mxcfb2:off vmalloc=400M "        \   
+                        "video=mxcfb2:dev=hdmi,1280x720M@60,bpp=32 " \ 
+                        "video=mxcfb1:off vmalloc=400M "        \   
                         "androidboot.console=ttymxc0 androidboot.hardware=freescale fbmem=13M,12M\0" \
                 "bootargs_ldb=console=ttymxc0,115200 init=/init emmc_en "      \   
                         "video=mxcfb0:dev=ldb,1366x768M@60,if=RGB24,bpp=32 " \ 
@@ -94,7 +95,7 @@
                         "androidboot.console=ttymxc0,115200 androidboot.hardware=freescale fbmem=12M\0"        \   
                 "bootargs_dual=console=ttymxc0 init=/init emmc_en " \ 
                         "video=mxcfb0:dev=ldb,1366x768M@60,bpp=32 " \ 
-                        "video=mxcfb1:dev=hdmi,1280x720M@60,bpp=32 " \ 
-                        "video=mxcfb2:off vmalloc=400M "        \   
+                        "video=mxcfb2:dev=hdmi,1280x720M@60,bpp=32 " \ 
+                        "video=mxcfb1:off vmalloc=400M "        \   
                         "androidboot.console=ttymxc0 androidboot.hardware=freescale fbmem=13M,12M\0"
 #endif

@@ -44,6 +44,10 @@
 #define CONFIG_FASTBOOT_TRANSFER_BUF	0x2c000000
 #define CONFIG_FASTBOOT_TRANSFER_BUF_SIZE 0x14000000 /* 320M byte */
 
+/* This version incorporates HAB, should be coordinated with 
+   WIDEVINE_SUPPORT directive in myandroid/make.sh */
+#define CONFIG_SECURE_BOOT
+#define DEBUG_AUTHENTICATE_IMAGE
 
 #define CONFIG_CMD_BOOTI
 #define CONFIG_ANDROID_RECOVERY

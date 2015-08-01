@@ -25,4 +25,5 @@ File = "/home/mrobbeloth/projects/quad_src_main_4.3/myandroid/vendor/freescale/c
 # Length of block in bytes, image data file
 [Authenticate Data]
 Verification index = 2
-Blocks = 0x27800400 0x400 0x32c00 "/home/mrobbeloth/projects/quad_src_main_4.3/myandroid/out/target/product/ar6mx/u-boot-6q-pad.bin"
+Blocks = 0x27800400 0x400 0x32c00 "/home/mrobbeloth/projects/quad_src_main_4.3/myandroid/out/target/product/ar6mx/u-boot-6q-pad.bin",\
+0x00910000 0x42c 0x2a0 "/home/mrobbeloth/projects/quad_src_main_4.3/myandroid/out/target/product/ar6mx/u-boot-6q-pad.bin"

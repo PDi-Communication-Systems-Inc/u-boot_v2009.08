@@ -76,6 +76,7 @@
 #define CONFIG_CONS_INDEX		1
 #define CONFIG_BAUDRATE			115200
 #define CONFIG_SYS_BAUDRATE_TABLE	{9600, 19200, 38400, 57600, 115200}
+#define AR6MX_SOLO_DTE_MODE
 
 /***********************************************************
  * Command definition
@@ -116,7 +117,7 @@
 
 #define CONFIG_CMD_IMX_DOWNLOAD_MODE
 
-#define CONFIG_BOOTDELAY 3
+#define CONFIG_BOOTDELAY 1
 
 #define CONFIG_PRIME	"FEC0"
 
@@ -131,8 +132,8 @@
 		"kernel=uImage\0"				\
 		"bootdelay=2\0"				\
 		"loadaddr=0x10800000\0"       \
-		"bootargs=console=ttymxc3,115200\0"	\
-		"bootargs_base=setenv bootargs console=ttymxc3,115200\0"	\
+		"bootargs=console=ttymxc0,115200\0"	\
+		"bootargs_base=setenv bootargs console=ttymxc0,115200\0"	\
 		"bootargs_hdmi=setenv bootargs ${bootargs} root=/dev/mmcblk0p1 emmc_en "	\
 		"rootwait rw video=mxcfb0:dev=hdmi,1920x1080M@60,if=RGB24 nosmp enable_wait_mode=off\0"		\
 		"bootargs_ldb=setenv bootargs ${bootargs} root=/dev/mmcblk0p1 emmc_en "	\

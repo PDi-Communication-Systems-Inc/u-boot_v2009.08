@@ -57,13 +57,13 @@
 #define  UCR1_TRDYEN     (1<<13) /* Transmitter ready interrupt enable */
 #define  UCR1_IDEN       (1<<12) /* Idle condition interrupt */
 #define  UCR1_RRDYEN     (1<<9)	 /* Recv ready interrupt enable */
-#define  UCR1_RDMAEN     (1<<8)	 /* Recv ready DMA enable */
+#define  UCR1_RXDMAEN    (1<<8)	 /* Recv ready DMA enable */
 #define  UCR1_IREN       (1<<7)	 /* Infrared interface enable */
 #define  UCR1_TXMPTYEN   (1<<6)	 /* Transimitter empty interrupt enable */
 #define  UCR1_RTSDEN     (1<<5)	 /* RTS delta interrupt enable */
 #define  UCR1_SNDBRK     (1<<4)	 /* Send break */
 #define  UCR1_TDMAEN     (1<<3)	 /* Transmitter ready DMA enable */
-#define  UCR1_UARTCLKEN  (1<<2)	 /* UART clock enabled */
+#define  UCR1_ATDMAEN    (1<<2)	 /* Aging DMA Timer Enable works with AGTIM on USR1 */
 #define  UCR1_DOZE       (1<<1)	 /* Doze */
 #define  UCR1_UARTEN     (1<<0)	 /* UART enabled */
 #define  UCR2_ESCI	 (1<<15) /* Escape seq interrupt enable */
@@ -76,6 +76,7 @@
 #define  UCR2_STPB       (1<<6)	 /* Stop */
 #define  UCR2_WS         (1<<5)	 /* Word size */
 #define  UCR2_RTSEN      (1<<4)	 /* Request to send interrupt enable */
+#define  UCR2_ATEN       (1<<3)  /* Aging Timer enabled */
 #define  UCR2_TXEN       (1<<2)	 /* Transmitter enabled */
 #define  UCR2_RXEN       (1<<1)	 /* Receiver enabled */
 #define  UCR2_SRST	 (1<<0)	 /* SW reset */
@@ -89,15 +90,16 @@
 #define  UCR3_RXDSEN	 (1<<6)  /* Receive status interrupt enable */
 #define  UCR3_AIRINTEN   (1<<5)  /* Async IR wake interrupt enable */
 #define  UCR3_AWAKEN	 (1<<4)  /* Async wake interrupt enable */
-#define  UCR3_REF25	 (1<<3)  /* Ref freq 25 MHz */
-#define  UCR3_REF30	 (1<<2)  /* Ref Freq 30 MHz */
+#define  UCR3_DTRDEN	 (1<<3)  /* Data Terminal Ready Delta enable */
+#define  UCR3_RXDMUXSEL	 (1<<2)  /* RXD Muxed Input Selected. should always be set */
 #define  UCR3_INVT	 (1<<1)  /* Inverted Infrared transmission */
 #define  UCR3_BPEN	 (1<<0)  /* Preset registers enable */
 #define  UCR4_CTSTL_32   (32<<10) /* CTS trigger level (32 chars) */
+#define  UCR4_CTSTL_16   (16<<10) /* CTS trigger level (32 chars) */
 #define  UCR4_INVR	 (1<<9)  /* Inverted infrared reception */
 #define  UCR4_ENIRI	 (1<<8)  /* Serial infrared interrupt enable */
 #define  UCR4_WKEN	 (1<<7)  /* Wake interrupt enable */
-#define  UCR4_REF16	 (1<<6)  /* Ref freq 16 MHz */
+#define  UCR4_IDDMAEN	 (1<<6)  /* DMA IDLE COndition Detected Interrupt Enable */
 #define  UCR4_IRSC	 (1<<5)  /* IR special case */
 #define  UCR4_TCEN	 (1<<3)  /* Transmit complete interrupt enable */
 #define  UCR4_BKEN	 (1<<2)  /* Break condition interrupt enable */
@@ -145,7 +147,12 @@ void serial_setbrg (void)
 	if (!gd->baudrate)
 		gd->baudrate = CONFIG_BAUDRATE;
 
-	__REG(UART_PHYS + UFCR) = 4 << 7; /* divide input clock by 2 */
+#ifndef AR6MX_SOLO_DTE_MODE
+#warning Setting DTE mode for AR6MX Solo
+	__REG(UART_PHYS + UFCR) = 4 << 7 | 1 << 6; /* divide input clock by 2, set DTE mode */
+#else
+	__REG(UART_PHYS + UFCR) = 4 << 7;
+#endif
 	__REG(UART_PHYS + UBIR) = 0xf;
 	__REG(UART_PHYS + UBMR) = clk / (2 * gd->baudrate);
 
@@ -200,8 +207,16 @@ int serial_init (void)
 
 	while (!(__REG(UART_PHYS + UCR2) & UCR2_SRST));
 
+#ifndef AR6MX_SOLO_DTE_MODE
+	/* A DTE device should not look at RI or DCD, also
+           to accept entry Receive Status Interrupt Enable
+           should be set RXDSEN  */
+	__REG(UART_PHYS + UCR3) = UCR3_RXDMUXSEL;
+	__REG(UART_PHYS + UCR4) = UCR4_CTSTL_16;
+#else
 	__REG(UART_PHYS + UCR3) = 0x0704;
 	__REG(UART_PHYS + UCR4) = 0x8000;
+#endif
 	__REG(UART_PHYS + UESC) = 0x002b;
 	__REG(UART_PHYS + UTIM) = 0x0;
 
@@ -209,9 +224,14 @@ int serial_init (void)
 
 	serial_setbrg();
 
+#ifndef AR6MX_SOLO_DTE_MODE
+#warning Adjusting UCR2 Register for AR6MX Solo
+	__REG(UART_PHYS + UCR2) = UCR2_WS | UCR2_IRTS | UCR2_RXEN | UCR2_TXEN | UCR2_SRST; 
+        __REG(UART_PHYS + UCR1) = UCR1_UARTEN; 
+#else
 	__REG(UART_PHYS + UCR2) = UCR2_WS | UCR2_IRTS | UCR2_RXEN | UCR2_TXEN | UCR2_SRST;
-
-	__REG(UART_PHYS + UCR1) = UCR1_UARTEN;
+        __REG(UART_PHYS + UCR1) = UCR1_UARTEN;
+#endif
 
 	return 0;
 }

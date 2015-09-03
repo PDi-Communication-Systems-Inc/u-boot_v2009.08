@@ -387,6 +387,7 @@ int dram_init(void)
 
 static void setup_uart(void)
 {
+unsigned int reg;
 #if defined CONFIG_MX6Q
    	/* UART4 TXD */
    	mxc_iomux_v3_setup_pad(MX6Q_PAD_KEY_COL0__UART4_TXD);
@@ -399,12 +400,20 @@ static void setup_uart(void)
 #elif defined CONFIG_MX6DL
 	/* UART4 TXD */
 	mxc_iomux_v3_setup_pad(MX6DL_PAD_KEY_COL0__UART4_TXD);
-	/* UART1 TXD */
-	mxc_iomux_v3_setup_pad(MX6DL_PAD_SD3_DAT7__UART1_TXD);
+	/* UART1 RXD */
+	mxc_iomux_v3_setup_pad(MX6DL_PAD_SD3_DAT7__UART1_RXD);
 	/* UART4 RXD */
 	mxc_iomux_v3_setup_pad(MX6DL_PAD_KEY_ROW0__UART4_RXD);
-	/* UART1 RXD */
-	mxc_iomux_v3_setup_pad(MX6DL_PAD_SD3_DAT6__UART1_RXD);
+	/* UART1 TXD */
+	mxc_iomux_v3_setup_pad(MX6DL_PAD_SD3_DAT6__UART1_TXD);
+
+       /* Ensure UART_CTS, UART_RTS, UART_TXD, and UART_RXD is
+          set up properly for DTE mode on UART1 see page 
+          2772 section 37.4.570 of processor guide along with
+          section 64.15.8 or page 5204 for UARTx_UFCR register */
+/*       reg = 0x0;
+       writel(reg, 0x20E08F8);
+       writel(reg, 0x20E08FC); */
 #endif
 }
 
@@ -948,13 +957,12 @@ iomux_v3_cfg_t usdhc3_pads[] = {
 	MX6DL_PAD_SD3_DAT1__USDHC3_DAT1,
 	MX6DL_PAD_SD3_DAT2__USDHC3_DAT2,
 	MX6DL_PAD_SD3_DAT3__USDHC3_DAT3,
-#if 0 //+oliver
-	MX6DL_PAD_SD3_DAT4__USDHC3_DAT4,
+        MX6DL_PAD_SD3_DAT6__USDHC3_DAT6,
+        MX6DL_PAD_SD3_DAT7__USDHC3_DAT7,
+
+/*	MX6DL_PAD_SD3_DAT4__USDHC3_DAT4,
 	MX6DL_PAD_SD3_DAT5__USDHC3_DAT5,
-	MX6DL_PAD_SD3_DAT6__USDHC3_DAT6,
-	MX6DL_PAD_SD3_DAT7__USDHC3_DAT7,
-	MX6DL_PAD_GPIO_18__USDHC3_VSELECT,
-#endif  //+oliver
+	MX6DL_PAD_GPIO_18__USDHC3_VSELECT, */
 };
 
 iomux_v3_cfg_t usdhc4_pads[] = {

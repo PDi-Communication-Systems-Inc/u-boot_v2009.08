@@ -147,11 +147,11 @@ void serial_setbrg (void)
 	if (!gd->baudrate)
 		gd->baudrate = CONFIG_BAUDRATE;
 
-#ifndef AR6MX_SOLO_DTE_MODE
+#ifdef AR6MX_SOLO_DTE_MODE
 #warning Setting DTE mode for AR6MX Solo
 	__REG(UART_PHYS + UFCR) = 4 << 7 | 1 << 6; /* divide input clock by 2, set DTE mode */
 #else
-	__REG(UART_PHYS + UFCR) = 4 << 7;
+	__REG(UART_PHYS + UFCR) = 4 << 7; /* divide input clock by 2 */
 #endif
 	__REG(UART_PHYS + UBIR) = 0xf;
 	__REG(UART_PHYS + UBMR) = clk / (2 * gd->baudrate);
@@ -207,7 +207,7 @@ int serial_init (void)
 
 	while (!(__REG(UART_PHYS + UCR2) & UCR2_SRST));
 
-#ifndef AR6MX_SOLO_DTE_MODE
+#ifdef AR6MX_SOLO_DTE_MODE
 	/* A DTE device should not look at RI or DCD, also
            to accept entry Receive Status Interrupt Enable
            should be set RXDSEN  */
@@ -224,14 +224,9 @@ int serial_init (void)
 
 	serial_setbrg();
 
-#ifndef AR6MX_SOLO_DTE_MODE
-#warning Adjusting UCR2 Register for AR6MX Solo
 	__REG(UART_PHYS + UCR2) = UCR2_WS | UCR2_IRTS | UCR2_RXEN | UCR2_TXEN | UCR2_SRST; 
-        __REG(UART_PHYS + UCR1) = UCR1_UARTEN; 
-#else
-	__REG(UART_PHYS + UCR2) = UCR2_WS | UCR2_IRTS | UCR2_RXEN | UCR2_TXEN | UCR2_SRST;
-        __REG(UART_PHYS + UCR1) = UCR1_UARTEN;
-#endif
+
+	__REG(UART_PHYS + UCR1) = UCR1_UARTEN; 
 
 	return 0;
 }

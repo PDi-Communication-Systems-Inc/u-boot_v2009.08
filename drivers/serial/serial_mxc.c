@@ -151,6 +151,7 @@ void serial_setbrg (void)
 #warning Setting DTE mode for AR6MX Solo
 	__REG(UART_PHYS + UFCR) = 4 << 7 | 1 << 6; /* divide input clock by 2, set DTE mode */
 #else
+#warning Setting DCE mode for AR6MX Quad
 	__REG(UART_PHYS + UFCR) = 4 << 7; /* divide input clock by 2 */
 #endif
 	__REG(UART_PHYS + UBIR) = 0xf;

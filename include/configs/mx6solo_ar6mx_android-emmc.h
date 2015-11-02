@@ -38,6 +38,7 @@
 #define CONFIG_FASTBOOT_CONFIGURATION_STR  "Android fastboot"
 #define CONFIG_FASTBOOT_SERIAL_NUM	"12345"
 #define CONFIG_FASTBOOT_SATA_NO		 0
+#define AR6MX_SOLO_DTE_MODE 		1
 
 /*  For system.img growing up more than 256MB, more buffer needs
 *   to receive the system.img*/

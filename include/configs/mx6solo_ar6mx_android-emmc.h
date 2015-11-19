@@ -81,22 +81,22 @@
                         "video=mxcfb0:dev=hdmi,1280x720M@60,if=RGB24,bpp=32 " \ 
                         "video=mxcfb1:off video=mxcfb2:off vmalloc=400M "       \   
                         "androidboot.console=ttymxc0,115200 androidboot.hardware=freescale " \
-                        "fbmem=12M enable_wait_mode=off\0"        \  
+                        "fbmem=24M enable_wait_mode=off\0"        \  
                 "bootargs_ldb=console=ttymxc0,115200 init=/init nosmp emmc_en "      \   
                         "video=mxcfb0:dev=ldb,1366x768M@60,if=RGB24,bpp=32 " \ 
                         "video=mxcfb1:off video=mxcfb2:off vmalloc=400M "       \   
                         "androidboot.console=ttymxc0 androidboot.hardware=freescale " \ 
-                        "fbmem=13M enable_wait_mode=off\0"        \   
+                        "fbmem=26M enable_wait_mode=off\0"        \   
                 "bootargs_hdmi=console=ttymxc0,115200 init=/init nosmp emmc_en "      \   
                         "video=mxcfb0:dev=hdmi,1280x720M@60,if=RGB24,bpp=32 " \ 
                         "video=mxcfb1:off video=mxcfb2:off vmalloc=400M "       \   
                         "androidboot.console=ttymxc0,115200 androidboot.hardware=freescale " \
-                        "fbmem=12M enable_wait_mode=off\0"        \   
+                        "fbmem=24M enable_wait_mode=off\0"        \   
                 "bootargs_dual=console=ttymxc0 init=/init nosmp emmc_en " \ 
                         "video=mxcfb0:dev=ldb,1366x768M@60,bpp=32 " \ 
                         "video=mxcfb1:dev=hdmi,1280x720M@60,bpp=32 " \ 
                         "video=mxcfb2:off vmalloc=400M "        \   
                         "androidboot.console=ttymxc0 androidboot.hardware=freescale " \ 
-                        "fbmem=13M,12M enable_wait_mode=off\0"
+                        "fbmem=26M,24M enable_wait_mode=off\0"
 
 #endif

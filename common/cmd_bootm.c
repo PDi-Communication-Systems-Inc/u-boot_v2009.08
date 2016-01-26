@@ -1673,15 +1673,72 @@ int do_booti(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 	printf("kernel   @ %08x (%d)\n", hdr->kernel_addr, hdr->kernel_size);
 	printf("ramdisk  @ %08x (%d)\n", hdr->ramdisk_addr, hdr->ramdisk_size);
 
+/* i.MX6 Authenticated/Encrypted Boot Header
+
+ * Note: Ramdisk image size is first padded to nearest ALIGN_SIZE boundary
+
+ *       and includes IVT_SIZE + CSF_PAD_SIZE + (ALIGN_SIZE - IVT_SIZE) additional data
+
+ **
+
+ ** +-----------------+
+
+ ** | boot header     | 1 page
+
+ ** +-----------------+
+
+ ** | kernel          | n pages
+
+ ** +-----------------+ -----------------------------+
+
+ ** | ramdisk         |                              |
+
+ ** +-----------------+ --+                          |
+
+ ** | align_size pad  |   | next ALIGN_SIZE boundary |
+
+ ** +-----------------+ --+                          |
+
+ ** | IVT             |                              |
+
+ ** +-----------------+ --+                          | m pages
+
+ ** | HAB_DATA        |   |                          |
+
+ ** +-----------------+   | CSF_PAD_SIZE             |
+
+ ** | csf_pad_size    |   |                          |
+
+ ** +-----------------+ --+--+                       |
+
+ ** | DEK_BLOB (opt.) |      |                       |
+
+ ** +-----------------+      | ALIGN_SIZE - IVT_SIZE |
+
+ ** | align_size pad  |      |                       |
+
+ ** +-----------------+ -----+-----------------------+
+
+ ** | second stage    | o pages
+
+ ** +-----------------+
+
+ **
+
+*/
+
 #ifdef CONFIG_SECURE_BOOT
 #define IVT_SIZE 0x20
 #define CSF_PAD_SIZE 0x2000
+#define ALIGN_SIZE 0x1000
+        printf("authenticating with image_size = 0x%lx\n", image_size);
 	extern uint32_t authenticate_image(uint32_t ddr_start,
 					   uint32_t image_size);
 
 	image_size = hdr->ramdisk_addr + hdr->ramdisk_size - hdr->kernel_addr -
-		IVT_SIZE - CSF_PAD_SIZE;
+		IVT_SIZE - CSF_PAD_SIZE - (ALIGN_SIZE - IVT_SIZE);
 
+        printf("authenticating with adjusted image_size = 0x%lx\n", image_size);
 	if (authenticate_image(hdr->kernel_addr, image_size))
 		printf("Authentication Successful\n");
 	else

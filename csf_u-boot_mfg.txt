@@ -1,0 +1,30 @@
+[Header]
+Version = 4.1
+Hash Algorithm = sha256
+Engine Configuration = 0
+Certificate Format = X509
+Signature Format = CMS
+Engine = CAAM
+[Install SRK]
+File = "/mnt/savage/mrobbeloth/projects/quad_src_main_4.3/myandroid/vendor/freescale/cst-2.3.1/crts/SRK_1_2_3_4_table.bin"
+Source index = 0
+[Install CSFK]
+File = "/mnt/savage/mrobbeloth/projects/quad_src_main_4.3/myandroid/vendor/freescale/cst-2.3.1/crts/CSF1_1_sha256_2048_65537_v3_usr_crt.pem"
+[Authenticate CSF]
+[Unlock]
+Engine = CAAM
+Features = RNG
+[Install Key]
+Verification index = 0
+Target index = 2
+File = "/mnt/savage/mrobbeloth/projects/quad_src_main_4.3/myandroid/vendor/freescale/cst-2.3.1/crts/IMG1_1_sha256_2048_65537_v3_usr_crt.pem"
+# Sign padded u-boot starting at the IVT through to the end with
+# length = 0x71000 (padded u-boot length) - 0x400 (IVT offset) = 0x70C00
+# This covers the essential parts: IVT, boot data and DCD.
+# Blocks have the following definition:
+# Image block start address on i.MX, Offset from start of image file,
+# Length of block in bytes, image data file
+[Authenticate Data]
+Verification index = 2
+Blocks = 0x27800400 0x400 0x2ac00 "/mnt/savage/mrobbeloth/projects/quad_src_main_4.3/myandroid/out/target/product/ar6mx/u-boot-6qmfg-pad.bin",\
+0x00910000 0x434 0x290 "/mnt/savage/mrobbeloth/projects/quad_src_main_4.3/myandroid/out/target/product/ar6mx/u-boot-6qmfg-pad.bin"

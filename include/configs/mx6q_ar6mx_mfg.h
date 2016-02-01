@@ -34,6 +34,11 @@
 #define CONFIG_FLASH_HEADER_OFFSET 0x400
 #define CONFIG_MX6_CLK32	   32768
 
+/* This version incorporates HAB, should be coordinated with 
+    WIDEVINE_SUPPORT directive in myandroid/make.sh */
+#define CONFIG_SECURE_BOOT
+#define DEBUG_AUTHENTICATE_IMAGE
+
 #define CONFIG_SKIP_RELOCATE_UBOOT
 
 #define CONFIG_ARCH_CPU_INIT

@@ -1519,10 +1519,10 @@ uint32_t authenticate_image(uint32_t ddr_start, uint32_t image_size)
 #ifdef DEBUG_AUTHENTICATE_IMAGE
 		printf("\nivt_offset = 0x%x, ivt addr = 0x%x\n",
 		       ivt_offset, ddr_start + ivt_offset);
-		printf("Dumping IVT\n");
+		printf("Dumping IVT at 0x%x\n", ddr_start+ivt_offset);
 		dump_mem(ddr_start + ivt_offset, 0x20);
 
-		printf("Dumping CSF Header\n");
+		printf("Dumping CSF Header at 0x%x\n", ddr_start+ivt_offset+0x20);
 		dump_mem(ddr_start + ivt_offset + 0x20, 0x40);
 
 		get_hab_status();
@@ -1532,6 +1532,7 @@ uint32_t authenticate_image(uint32_t ddr_start, uint32_t image_size)
 		       "\n\tbytes = 0x%x\n", ivt_offset, start, bytes);
 #endif
 
+		printf("Calling hab_rvt_authenticate_image\n");
 		load_addr = (uint32_t)hab_rvt_authenticate_image(
 					HAB_CID_UBOOT,
 					ivt_offset, (void **)&start,

@@ -28,6 +28,10 @@ include $(TOPDIR)/config.mk
 LIB	= $(obj)lib$(SOC).a
 
 COBJS	= interrupts.o generic.o iomux-v3.o timer.o
+COBJS-$(CONFIG_CMD_DEKBLOB) += cmd_dek.o
+COBJS-y += sec.o
+COBJS-$(CONFIG_FSL_CAAM) += jr.o fsl_hash.o jobdesc.o error.o
+COBJS-$(CONFIG_CMD_BLOB)$(CONFIG_CMD_DEKBLOB) += fsl_blob.o
 COBJS += $(COBJS-y)
 
 SRCS	:= $(SOBJS:.o=.S) $(COBJS:.o=.c)

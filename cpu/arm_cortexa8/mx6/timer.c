@@ -27,6 +27,17 @@
 #include <asm/arch/mx6.h>
 #include <div64.h>
 
+#define MXC_CPU_MX51            0x51
+#define MXC_CPU_MX53            0x53
+#define MXC_CPU_MX6SL           0x60
+#define MXC_CPU_MX6DL           0x61
+#define MXC_CPU_MX6SX           0x62
+#define MXC_CPU_MX6Q            0x63
+#define MXC_CPU_MX6UL           0x64
+#define MXC_CPU_MX6SOLO         0x66 /* dummy */
+#define MXC_CPU_MX6D            0x67
+#define MXC_CPU_MX7D            0x72
+
 #define TIMER_BASE GPT_BASE_ADDR /* General purpose timer 1 */
 
 /* General purpose timers registers */
@@ -40,6 +51,14 @@
 #define GPTCR_FRR		(1 << 9)	/* Freerun / restart */
 #define GPTCR_CLKSOURCE_32	(4 << 6)	/* Clock source */
 #define GPTCR_TEN		(1)		/* Timer enable */
+
+#ifdef CONFIG_SYS_MX6_HCLK
+#define MXC_HCLK        CONFIG_SYS_MX6_HCLK
+#else
+#define MXC_HCLK        24000000
+#endif
+
+#define CONFIG_MXC_GPT_HCLK
 
 static ulong timestamp;
 static ulong lastinc;
@@ -178,4 +197,54 @@ void udelay(unsigned long usec)
 
 	while (get_ticks() < tmp)	/* loop till event */
 		 /*NOP*/;
+}
+
+static inline int gpt_has_clk_source_osc(void)
+{
+#if defined(CONFIG_MX6Q)
+        return 1;
+#else
+        return 0;
+#endif
+}
+
+static inline ulong gpt_get_clk(void)
+{
+#ifdef CONFIG_MXC_GPT_HCLK
+        if (gpt_has_clk_source_osc())
+                return MXC_HCLK >> 3;
+        else
+                return mxc_get_clock(MXC_IPG_PERCLK);
+#else
+        return MXC_CLK32; //32768
+#endif
+
+}
+
+
+/*
+ * This function is derived from PowerPC code (timebase clock frequency).
+ * On ARM it returns the number of timer ticks per second.
+ */
+ulong get_tbclk(void)
+{
+        return gpt_get_clk();
+}
+
+
+/*
+ * This function is intended for SHORT delays only.
+ * It will overflow at around 10 seconds @ 400MHz,
+ * or 20 seconds @ 200MHz.
+ */
+unsigned long usec2ticks(unsigned long usec)
+{
+        ulong ticks;
+
+        if (usec < 1000)
+                ticks = ((usec * (get_tbclk()/1000)) + 500) / 1000;
+        else
+                ticks = ((usec / 10) * (get_tbclk() / 100000));
+
+        return ticks;
 }

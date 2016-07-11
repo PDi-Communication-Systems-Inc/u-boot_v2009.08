@@ -42,6 +42,8 @@
 #include <asm/system.h>
 #include <asm/cache.h>
 #include <asm/cache-cp15.h>
+#include <asm/pl310.h>
+#include <asm/io.h>
 #include <asm/mmu.h>
 
 #ifndef CONFIG_L2_OFF
@@ -183,5 +185,195 @@ int cleanup_before_linux(void)
 #endif
 
 	return 0;
+}
+
+struct pl310_regs *const pl310 = (struct pl310_regs *)CONFIG_SYS_PL310_BASE;
+
+static void pl310_cache_sync(void)
+{
+        writel(0, &pl310->pl310_cache_sync);
+}
+
+
+
+/* invalidate memory from start to stop-1 */
+void v7_outer_cache_inval_range(u32 start, u32 stop)
+{
+        /* PL310 currently supports only 32 bytes cache line */
+        u32 pa, line_size = 32;
+
+        /*
+         * If start address is not aligned to cache-line do not
+         * invalidate the first cache-line
+         */
+        if (start & (line_size - 1)) {
+                printf("ERROR: %s - start address is not aligned - 0x%08x\n",
+                        __func__, start);
+                /* move to next cache line */
+                start = (start + line_size - 1) & ~(line_size - 1);
+        }
+
+        /*
+        * If stop address is not aligned to cache-line do not
+         * invalidate the last cache-line
+         */
+        if (stop & (line_size - 1)) {
+               printf("ERROR: %s - stop address is not aligned - 0x%08x\n",
+                        __func__, stop);
+                /* align to the beginning of this cache line */
+                stop &= ~(line_size - 1);
+        }
+
+        for (pa = start; pa < stop; pa = pa + line_size)
+                writel(pa, &pl310->pl310_inv_line_pa);
+
+        pl310_cache_sync();
+}
+
+
+/* Flush(clean invalidate) memory from start to stop-1 */
+void v7_outer_cache_flush_range(u32 start, u32 stop)
+{
+        /* PL310 currently supports only 32 bytes cache line */
+        u32 pa, line_size = 32;
+
+        /*
+         * If start address is not aligned to cache-line do not
+         * invalidate the first cache-line
+         */
+        if (start & (line_size - 1)) {
+                printf("ERROR: %s - start address is not aligned - 0x%08x\n",
+                        __func__, start);
+                /* move to next cache line */
+                start = (start + line_size - 1) & ~(line_size - 1);
+        }
+
+        /*
+         * If stop address is not aligned to cache-line do not
+         * invalidate the last cache-line
+         */
+        if (stop & (line_size - 1)) {
+                printf("ERROR: %s - stop address is not aligned - 0x%08x\n",
+                        __func__, stop);
+                /* align to the beginning of this cache line */
+                stop &= ~(line_size - 1);
+        }
+
+                /*
+         * Align to the beginning of cache-line - this ensures that
+         * the first 5 bits are 0 as required by PL310 TRM
+        */
+        start &= ~(line_size - 1);
+
+        for (pa = start; pa < stop; pa = pa + line_size)
+                writel(pa, &pl310->pl310_clean_inv_line_pa);
+
+        pl310_cache_sync();
+}
+
+
+static u32 get_ccsidr(void)
+{
+        u32 ccsidr;
+
+        /* Read current CP15 Cache Size ID Register */
+        asm volatile ("mrc p15, 1, %0, c0, c0, 0" : "=r" (ccsidr));
+        return ccsidr;
+}
+
+
+static void v7_dcache_clean_inval_range(u32 start, u32 stop, u32 line_len)
+{
+        u32 mva;
+
+        /* Align start to cache line boundary */
+        start &= ~(line_len - 1);
+        for (mva = start; mva < stop; mva = mva + line_len) {
+                /* DCCIMVAC - Clean & Invalidate data cache by MVA to PoC */
+                asm volatile ("mcr p15, 0, %0, c7, c14, 1" : : "r" (mva));
+        }
+}
+
+static void v7_dcache_inval_range(u32 start, u32 stop, u32 line_len)
+{
+       u32 mva;
+
+        /*
+         * If start address is not aligned to cache-line do not
+         * invalidate the first cache-line
+         */
+        if (start & (line_len - 1)) {
+                printf("ERROR: %s - start address is not aligned - 0x%08x\n",
+                        __func__, start);
+                /* move to next cache line */
+                start = (start + line_len - 1) & ~(line_len - 1);
+        }
+
+        /*
+         * If stop address is not aligned to cache-line do not
+         * invalidate the last cache-line
+         */
+        if (stop & (line_len - 1)) {
+                printf("ERROR: %s - stop address is not aligned - 0x%08x\n",
+                        __func__, stop);
+                /* align to the beginning of this cache line */
+                stop &= ~(line_len - 1);
+        }
+
+        for (mva = start; mva < stop; mva = mva + line_len) {
+                /* DCIMVAC - Invalidate data cache by MVA to PoC */
+                asm volatile ("mcr p15, 0, %0, c7, c6, 1" : : "r" (mva));
+        }
+}
+
+
+
+static void v7_dcache_maint_range(u32 start, u32 stop, u32 range_op)
+{
+        u32 line_len, ccsidr;
+
+        ccsidr = get_ccsidr();
+        line_len = ((ccsidr & CCSIDR_LINE_SIZE_MASK) >>
+                        CCSIDR_LINE_SIZE_OFFSET) + 2;
+        /* Converting from words to bytes */
+        line_len += 2;
+        /* converting from log2(linelen) to linelen */
+        line_len = 1 << line_len;
+
+        switch (range_op) {
+        case ARMV7_DCACHE_CLEAN_INVAL_RANGE:
+                v7_dcache_clean_inval_range(start, stop, line_len);
+                break;
+        case ARMV7_DCACHE_INVAL_RANGE:
+                v7_dcache_inval_range(start, stop, line_len);
+                break;
+        }
+
+        /* DSB to make sure the operation is complete */
+        CP15DSB;
+}
+
+
+/*
+ * Flush range(clean & invalidate) from all levels of D-cache/unified
+ * cache used:
+ * Affects the range [start, stop - 1]
+ */
+void flush_dcache_range(unsigned long start, unsigned long stop)
+{
+        v7_dcache_maint_range(start, stop, ARMV7_DCACHE_CLEAN_INVAL_RANGE);
+
+        v7_outer_cache_flush_range(start, stop);
+}
+
+/*
+ * Invalidates range in all levels of D-cache/unified cache used:
+ * Affects the range [start, stop - 1]
+ */
+void invalidate_dcache_range(unsigned long start, unsigned long stop)
+{
+        v7_dcache_maint_range(start, stop, ARMV7_DCACHE_INVAL_RANGE);
+
+        v7_outer_cache_inval_range(start, stop);
 }
 

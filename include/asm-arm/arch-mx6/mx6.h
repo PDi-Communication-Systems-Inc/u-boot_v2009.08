@@ -19,6 +19,13 @@
 #ifndef __ASM_ARCH_MXC_MX6_H__
 #define __ASM_ARCH_MXC_MX6_H__
 
+#define CONFIG_SYS_CACHELINE_SIZE       32
+
+#ifndef CONFIG_SYS_L2CACHE_OFF
+#define CONFIG_SYS_L2_PL310
+#define CONFIG_SYS_PL310_BASE   0x00A02000
+#endif
+
 /*
  * Some of i.MX 6 Series SoC registers are associated with four addresses
  * used for different operations - read/write, set, clear and toggle bits.
@@ -295,6 +302,9 @@
 /* ATZ#2  - Global enable (0) */
 #define CAAM_BASE_ADDR              (ATZ2_BASE_ADDR)
 #define ARM_BASE_ADDR		    (ATZ2_BASE_ADDR + 0x40000)
+
+#define CONFIG_SYS_FSL_SEC_ADDR     CAAM_BASE_ADDR
+#define CONFIG_SYS_FSL_JR0_ADDR     (CAAM_BASE_ADDR + 0x1000)
 
 #ifdef CONFIG_MX6SL
 #define USBO2H_PL301_IPS_BASE_ADDR  (AIPS2_OFF_BASE_ADDR + 0x0000)

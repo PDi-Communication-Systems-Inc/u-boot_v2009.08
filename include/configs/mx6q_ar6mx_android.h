@@ -49,6 +49,12 @@
 #define CONFIG_SECURE_BOOT
 #define DEBUG_AUTHENTICATE_IMAGE
 
+/* Add encrypted boot support */
+#define CONFIG_SYS_FSL_SEC_COMPAT  4 /* HAB version */
+#define CONFIG_FSL_CAAM
+#define CONFIG_CMD_DEKBLOB
+#define CONFIG_SYS_FSL_SEC_LE
+
 #define CONFIG_CMD_BOOTI
 #define CONFIG_ANDROID_RECOVERY
 /* which mmc bus is your main storage ? */

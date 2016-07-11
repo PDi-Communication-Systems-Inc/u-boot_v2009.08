@@ -1450,6 +1450,10 @@ void hab_caam_clock_enable(void)
 	reg = readl(CCM_BASE_ADDR + CLKCTL_CCGR0); /* CCGR0 */
 	reg |= 0x3F00; /*CG4 ~ CG6, enable CAAM clocks*/
 	writel(reg, CCM_BASE_ADDR + CLKCTL_CCGR0);
+
+        reg = readl(CCM_BASE_ADDR + CLKCTL_CCGR6); /* CCGR6 */
+        reg |= 0xFFF; /* EMI slow clk */
+        writel(reg, CCM_BASE_ADDR + CLKCTL_CCGR6);
 }
 
 

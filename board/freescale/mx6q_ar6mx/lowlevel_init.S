@@ -131,9 +131,20 @@ d_inv_loop:
 
 	/* Restore the default values in the Gate registers */
 	ldr r0, CCM_BASE_ADDR_W
-	ldr r1, =0xC0003F
+	/*
+	 * Setup CCM_CCOSR register as follows:	
+	 *
+	 * cko1_en  = 1    --> CKO1 enabled
+	 * cko1_div = 111  --> divide by 8
+	 * cko1_sel = 1011 --> ahb_clk_root
+	 *
+	 * This sets CKO1 at ahb_clk_root/8 = 132/8 = 16.5 MHz
+	*/
+	ldr r1, =0x000000FB
+	str r1, [r0, #CLKCTL_CCOSR]
+	ldr r1, =0xC03F3F
 	str r1, [r0, #CLKCTL_CCGR0]
-	ldr r1, =0x30FC00
+	ldr r1, =0x30FC03
 	str r1, [r0, #CLKCTL_CCGR1]
 	ldr r1, =0xFFFC000
 	str r1, [r0, #CLKCTL_CCGR2]
@@ -146,7 +157,7 @@ d_inv_loop:
 #ifdef CONFIG_CMD_WEIMNOR
 	ldr r1, =0xFFC
 #else
-	ldr r1, =0x3FC
+	ldr r1, =0x3FF
 #endif
 	str r1, [r0, #CLKCTL_CCGR6]
 .endm

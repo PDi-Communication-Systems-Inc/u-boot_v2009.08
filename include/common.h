@@ -696,6 +696,21 @@ int cpu_reset(int nr);
 int cpu_release(int nr, int argc, char *argv[]);
 #endif
 
+/* Define a null map_sysmem() if the architecture doesn't use it */
+static inline void *map_sysmem(phys_addr_t paddr, unsigned long len)
+{
+        return (void *)(uintptr_t)paddr;
+}
+
+static inline void unmap_sysmem(const void *vaddr)
+{
+}
+
+static inline phys_addr_t map_to_sysmem(const void *ptr)
+{
+        return (phys_addr_t)(uintptr_t)ptr;
+}
+
 #endif /* __ASSEMBLY__ */
 
 /* Put only stuff here that the assembler can digest */

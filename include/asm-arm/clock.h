@@ -25,6 +25,12 @@
 #define __ASM_ARCH_CLOCK_H__
 #include <linux/types.h>
 
+#ifdef CONFIG_SYS_MX6_CLK32
+#define MXC_CLK32       CONFIG_SYS_MX6_CLK32
+#else
+#define MXC_CLK32       32768
+#endif
+
 enum {
 	CPU_CLK = 0,
 	PERIPH_CLK,
@@ -40,5 +46,9 @@ enum {
 
 int clk_config(u32 ref, u32 freq, u32 clk_type);
 int clk_info(u32 clk_type);
+
+#ifdef CONFIG_SECURE_BOOT
+void hab_caam_clock_enable(void);
+#endif
 
 #endif

@@ -69,7 +69,7 @@ SECTIONS
 	/* Extend to align to 0x1000, then put the Hab Data */
 	. = ALIGN(0x1000);
 	__hab_data = .;
-	. = . + 0x2000;
+	. = . + 0x4000;   /* More than 2000 for Encrypted boot  */
 	__data_enc_key = .;
 	/* actually, only 64bytes are needed, but this generates
 		a size multiple of 512bytes, which is optimal for SD boot */

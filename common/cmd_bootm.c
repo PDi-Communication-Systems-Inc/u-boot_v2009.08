@@ -598,9 +598,28 @@ int do_bootm (cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 #ifdef CONFIG_SECURE_BOOT
 	extern uint32_t authenticate_image(
 			uint32_t ddr_start, uint32_t image_size);
+printf("image_size = 0x%08X\n", image_get_image_size((image_header_t *)load_addr));
+        printf("   Image magic:   %s\n", (char *)load_addr);
+
+        printf("   Header CRC:   0x%x\n", (int *)load_addr+8);
+        printf("   Creation TimeStamp:   0x%x\n", (int *)load_addr+16);
+
+        printf("   Image data size:   0x%x\n", (int *)load_addr+24);
+        printf("   Data load addr:   0x%x\n", (int *)load_addr+32);
+
+        printf("   Entry point addr:   0x%x\n", (int *)load_addr+40);
+        printf("   Image data CRC:   0x%x\n", (int *)load_addr+48);
+
+        //printf("   OS:   %s\n", (char *)load_addr+56);
+        //printf("   CPU arch:   %s\n", (char *)load_addr+64);
+
+        //printf("   Image type:      %s\n", (char *)load_addr+72);
+        //printf("   Compression type:   %s%x\n", (char *)load_addr+80);
+
+	//printf("   Name:   %s%x\n", (char *)load_addr+88);
+	
 	if (authenticate_image(load_addr,
 			image_get_image_size((image_header_t *)load_addr)) == 0) {
-		printf("Authenticate UImage Fail, Please check\n");
 		return 1;
 	}
 

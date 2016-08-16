@@ -155,7 +155,7 @@ int ar6mxs_board_version(void) {
 	ret |= (b1 << 1);
 	ret |= (b0 << 0);
         printf("BCM Board Version=%x%x%x%x (raw) \n", b3, b2, b1, b0);
-	printf("BCM BOard Version=%x (unified) \n", ret);
+	printf("BCM Board Version=%x (unified) \n", ret);
 	return ret; 
 }
 

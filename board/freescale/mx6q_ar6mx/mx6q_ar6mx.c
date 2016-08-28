@@ -1244,6 +1244,7 @@ int check_fastboot_by_arrow_left_and_down(void)
 
 int board_late_init(void)
 {
+	ar6mxs_board_version();
 	return 0;
 }
 

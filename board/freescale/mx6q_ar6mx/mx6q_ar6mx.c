@@ -28,6 +28,7 @@
 #include <asm/arch/iomux-v3.h>
 #include <asm/errno.h>
 #include <miiphy.h>
+
 #if defined(CONFIG_VIDEO_MX5)
 #include <linux/list.h>
 #include <linux/fb.h>
@@ -175,6 +176,39 @@ static struct fb_videomode lvds_xga = {
 vidinfo_t panel_info;
 #endif
 
+
+/* string replace code from user chantra on: 
+   http://coding.debuntu.org/c-implementing-str_replace-replace-all-occurrences-substring */
+char *
+str_replace ( const char *string, const char *substr, const char *replacement ){
+  char *tok = NULL;
+  char *newstr = NULL;
+  char *oldstr = NULL;
+  char *head = NULL;
+ 
+  /* if either substr or replacement is NULL, duplicate string a let caller handle it */
+  if ( substr == NULL || replacement == NULL ) return strdup (string);
+  newstr = strdup (string);
+  head = newstr;
+  while ( (tok = strstr ( head, substr ))){
+    oldstr = newstr;
+    newstr = malloc ( strlen ( oldstr ) - strlen ( substr ) + strlen ( replacement ) + 1 );
+    /*failed to alloc mem, free old string and return NULL */
+    if ( newstr == NULL ){
+      free (oldstr);
+      return NULL;
+    }
+    memcpy ( newstr, oldstr, tok - oldstr );
+    memcpy ( newstr + (tok - oldstr), replacement, strlen ( replacement ) );
+    memcpy ( newstr + (tok - oldstr) + strlen( replacement ), tok + strlen ( substr ), strlen ( oldstr ) - strlen ( substr ) - ( tok - oldstr ) );
+    memset ( newstr + strlen ( oldstr ) - strlen ( substr ) + strlen ( replacement ) , 0, 1 );
+    /* move back head right after the last replacement */
+    head = newstr + (tok - oldstr) + strlen( replacement );
+    free (oldstr);
+  }
+  return newstr;
+}
+
 int ar6mxs_board_version(void) {
    int b3 = 0;
    int b2 = 0;
@@ -205,16 +239,47 @@ int ar6mxs_board_version(void) {
              b3, b2, b1, b0, ret);
    }
 
+  /* update bootargs with board version, could be done in 
+      kernel board file, but okay here too */
+   char* cmdline = getenv("bootargs");
+   char* cmdline_a = (char *) malloc(strlen(cmdline) + 24);
+   sprintf(cmdline_a, "%s board_version=%x%x%x%x ", cmdline, b3, b2, b1, b0);
+   setenv("bootargs", cmdline_a);
+   free(cmdline_a);
+
    return ret; 
 }
 
 int ar6mx_tv_or_aio_reporting(void) {
+
+   /* Report the model class (type) 
+      P14TAB, Standard Module, SW Module for TV (high input) 
+      AIO (P19A), M-Series TV, or Universal Module for AIO (low input) */
+   int model_type = -1;
    printf("PDi Model Class: ");
    if (gpio_get_value(AR6MX_TV_OR_AIO)) {
       printf("TV (TAB)\n");
+      model_type = 1;
    }
    else {
       printf("AIO\n");
+      model_type = 0;
+   }
+
+
+   /* update bootargs with model type  */
+   char* cmdline = getenv("bootargs");
+   char* cmdline_a = (char *) malloc(strlen(cmdline) + 20); 
+   sprintf(cmdline_a, "%s model_type=%s ", cmdline, 
+           (model_type == 0) ? "AIO" : "TV"); 
+   setenv("bootargs", cmdline_a);
+   free(cmdline_a);
+
+   /* Replace RGB24 with RGB18 as needed */
+   if (model_type == 1) {
+      char* updated_bootargs = str_replace(
+          getenv("bootargs"), "RGB24", "RGB18");
+      setenv("bootargs", updated_bootargs);
    }
 }
 

@@ -83,13 +83,29 @@
 #define ENET_RST  IMX_GPIO_NR(1, 25)
 #define CLK125_EN IMX_GPIO_NR(6, 24)
 
+//GPIO 2_x is for power/status/keystroke
+//GPIO 4_x is for verison information
 iomux_v3_cfg_t board_ver_pads[] = {
 #if defined CONFIG_MX6Q
+	MX6Q_PAD_NANDF_D0__GPIO_2_0,
+        MX6Q_PAD_NANDF_D1__GPIO_2_1,
+	MX6Q_PAD_NANDF_D2__GPIO_2_2,
+	MX6Q_PAD_NANDF_D3__GPIO_2_3,
+	MX6Q_PAD_NANDF_D4__GPIO_2_4,
+	MX6Q_PAD_NANDF_D5__GPIO_2_5,
+	MX6Q_PAD_NANDF_D6__GPIO_2_6,
 	MX6Q_PAD_DISP0_DAT4__GPIO_4_25,
 	MX6Q_PAD_DISP0_DAT5__GPIO_4_26,
 	MX6Q_PAD_DISP0_DAT6__GPIO_4_27,
 	MX6Q_PAD_DISP0_DAT7__GPIO_4_28,
 #elif defined CONFIG_MX6DL
+        MX6DL_PAD_NANDF_D0__GPIO_2_0,
+        MX6DL_PAD_NANDF_D1__GPIO_2_1,
+        MX6DL_PAD_NANDF_D2__GPIO_2_2,
+        MX6DL_PAD_NANDF_D3__GPIO_2_3,
+        MX6DL_PAD_NANDF_D4__GPIO_2_4,
+        MX6DL_PAD_NANDF_D5__GPIO_2_5,
+        MX6DL_PAD_NANDF_D6__GPIO_2_6,
 	MX6DL_PAD_DISP0_DAT4__GPIO_4_25,
 	MX6DL_PAD_DISP0_DAT5__GPIO_4_26,
 	MX6DL_PAD_DISP0_DAT6__GPIO_4_27,
@@ -102,6 +118,27 @@ iomux_v3_cfg_t board_ver_pads[] = {
 #define AR6MX_VER_B1                IMX_GPIO_NR(4, 26)
 #define AR6MX_VER_B2                IMX_GPIO_NR(4, 27)
 #define AR6MX_VER_B3                IMX_GPIO_NR(4, 28)
+
+// PDi Transistor-Transistor Logic (TTL) Setup CN5 GPIO Pad
+#define AR6MX_TTL_DI0       IMX_GPIO_NR(2, 0)
+#define AR6MX_TTL_DI1       IMX_GPIO_NR(2, 1)
+#define AR6MX_TTL_DI2       IMX_GPIO_NR(2, 2)
+#define AR6MX_TTL_DI3       IMX_GPIO_NR(2, 3)
+#define AR6MX_TTL_DI4       IMX_GPIO_NR(2, 4)
+#define AR6MX_TTL_DI5       IMX_GPIO_NR(2, 5)
+#define AR6MX_TTL_DO0       IMX_GPIO_NR(2, 6)
+#define AR6MX_TTL_DO1       IMX_GPIO_NR(2, 7)
+
+// PDi Human readable Names for TTL GPIO Setup
+#define AR6MX_TV_POWER_REQ            AR6MX_TTL_DI0
+#define AR6MX_TV_ARROW_UP             AR6MX_TTL_DI1
+#define AR6MX_AIO_VOL_UP              AR6MX_TTL_DI1
+#define AR6MX_TV_ARROW_DOWN           AR6MX_TTL_DI2
+#define AR6MX_AIO_VOL_DOWN            AR6MX_TTL_DI2
+#define AR6MX_TV_ARROW_LEFT           AR6MX_TTL_DI3 // Arrow Left Not Available on P19 AIO Front Panel
+#define AR6MX_TV_OR_AIO               AR6MX_TTL_DI5 // float high for TV/Tab, pull low for all-in-one -JTS
+#define AR6MX_ANDROID_PWRSTATE        AR6MX_TTL_DO0
+#define AR6MX_INTERNAL_SPK_ENABLE     AR6MX_TTL_DO1
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -139,24 +176,46 @@ vidinfo_t panel_info;
 #endif
 
 int ar6mxs_board_version(void) {
-        int b3 = 0;
-        int b2 = 0;
-        int b1 = 0;
-        int b0 = 0;
-        int ret = 0;
+   int b3 = 0;
+   int b2 = 0;
+   int b1 = 0;
+   int b0 = 0;
+   int ret = 0;
 
-        printf("Detecting board version\n");
-        b3 = gpio_get_value(AR6MX_VER_B3);
-        b2 = gpio_get_value(AR6MX_VER_B2);
-        b1 = gpio_get_value(AR6MX_VER_B1);
-        b0 = gpio_get_value(AR6MX_VER_B0);
-        ret |= (b3 << 3);
-	ret |= (b2 << 2);
-	ret |= (b1 << 1);
-	ret |= (b0 << 0);
-        printf("BCM Board Version=%x%x%x%x (raw) \n", b3, b2, b1, b0);
-	printf("BCM Board Version=%x (unified) \n", ret);
-	return ret; 
+   b3 = gpio_get_value(AR6MX_VER_B3);
+   b2 = gpio_get_value(AR6MX_VER_B2);
+   b1 = gpio_get_value(AR6MX_VER_B1);
+   b0 = gpio_get_value(AR6MX_VER_B0);
+   ret |= (b3 << 3);
+   ret |= (b2 << 2);
+   ret |= (b1 << 1);
+   ret |= (b0 << 0);
+
+   /* print board version in serial console */
+   if (ret == 15) {
+      printf("Board Version: %x%x%x%x or 0x%x (TAB Solo)\n", 
+             b3, b2, b1, b0, ret);
+   }
+   else if (ret == 1) {
+      printf("Board Version: %x%x%x%x or 0x%x (TAB2 Quad)\n", 
+             b3, b2, b1, b0, ret);
+   }
+   else {
+      printf("Board Version: %x%x%x%x or 0x%x (Unknown)\n", 
+             b3, b2, b1, b0, ret);
+   }
+
+   return ret; 
+}
+
+int ar6mx_tv_or_aio_reporting(void) {
+   printf("PDi Model Class: ");
+   if (gpio_get_value(AR6MX_TV_OR_AIO)) {
+      printf("TV (TAB)\n");
+   }
+   else {
+      printf("AIO\n");
+   }
 }
 
 static inline void setup_boot_device(void)
@@ -1144,6 +1203,25 @@ int board_init(void)
 	setup_boot_device();
 	fsl_set_system_rev();
 
+        /* Configure gpio on CN5 */
+        gpio_direction_input(AR6MX_TV_POWER_REQ);
+        gpio_direction_input(AR6MX_TV_OR_AIO);
+
+        // Floats high for P14, pulled low for AIO P19A
+        if (gpio_get_value(AR6MX_TV_OR_AIO)) {
+           gpio_direction_input(AR6MX_TV_ARROW_UP);
+           gpio_direction_input(AR6MX_TV_ARROW_DOWN);
+           gpio_direction_input(AR6MX_TV_ARROW_LEFT);
+        }
+        else {
+ 	   gpio_direction_input(AR6MX_AIO_VOL_UP);
+	   gpio_direction_input(AR6MX_AIO_VOL_DOWN);
+        }
+
+	gpio_direction_output(AR6MX_ANDROID_PWRSTATE, 1);
+	gpio_set_value(AR6MX_ANDROID_PWRSTATE, 1);
+	gpio_direction_output(AR6MX_INTERNAL_SPK_ENABLE, 0);
+
 	/* board id for linux */
 	gd->bd->bi_arch_number = MACH_TYPE_AR6MX;
 
@@ -1245,6 +1323,7 @@ int check_fastboot_by_arrow_left_and_down(void)
 int board_late_init(void)
 {
 	ar6mxs_board_version();
+	ar6mx_tv_or_aio_reporting();
 	return 0;
 }
 

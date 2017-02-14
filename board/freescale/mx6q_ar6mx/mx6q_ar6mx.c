@@ -281,6 +281,14 @@ int ar6mx_tv_or_aio_reporting(void) {
           getenv("bootargs"), "RGB24", "RGB18");
       setenv("bootargs", updated_bootargs);
    }
+   /* On AIO units, primary display is lvds, adjust accordingly*/
+   else if (model_type == 0) {
+      char* updated_bootargs = str_replace(getenv("bootargs"), 
+               "video=mxcfb0:dev=hdmi", "video=mxcfb1:dev=hdmi");
+      updated_bootargs = str_replace(updated_bootargs, 
+         "video=mxcfb1:dev=ldb", "video=mxcfb0:dev=ldb");
+      setenv("bootargs", updated_bootargs);
+   }
 }
 
 static inline void setup_boot_device(void)

@@ -287,6 +287,8 @@ int ar6mx_tv_or_aio_reporting(void) {
                "video=mxcfb0:dev=hdmi", "video=mxcfb1:dev=hdmi");
       updated_bootargs = str_replace(updated_bootargs, 
          "video=mxcfb1:dev=ldb", "video=mxcfb0:dev=ldb");
+      updated_bootargs = str_replace(updated_bootargs, 
+         "fbmem=24M,26M", "fbmem=26M,24M");
       setenv("bootargs", updated_bootargs);
    }
 }
